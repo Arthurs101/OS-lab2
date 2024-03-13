@@ -9,22 +9,22 @@
 #define true  1
 #define false 0
 int alloc[NUM_PROCESSES][NUM_RESOURCES] = {
-        {1, 0, 0},
-        {0, 2, 0},
-        {0, 0, 3},
-        {3, 0, 1},
-        {0, 2, 0}
+        {2, 0, 0},
+        {0, 0, 1},
+        {3, 0, 0},
+        {0, 0, 1},
+        {1, 0, 2}
 };
 
 int max[NUM_PROCESSES][NUM_RESOURCES] = {
     {7, 5, 3},
     {3, 2, 2},
     {9, 3, 2},
-    {2, 2, 2},
+    {4, 2, 2},
     {4, 3, 3}
 };
 
-int avail[NUM_RESOURCES] = {20, 10, 12};
+int avail[NUM_RESOURCES] = {10,7, 15};
 int finish[NUM_PROCESSES] = {0};
 int safe_sequence[NUM_PROCESSES];
 int work[NUM_RESOURCES];
@@ -77,7 +77,7 @@ bool findSafeSecuence(){
     // Print the safe sequence
     printf("OS:\tSafe sequence found for giving resources: ");
     for (int i = 0; i < NUM_PROCESSES; ++i) {
-        if(i < NUM_PROCESSES -1){printf("P%d->", safe_sequence[i]);}
+        if(i < NUM_PROCESSES -3){printf("P%d->", safe_sequence[i]);}
         else{printf("P%d->", safe_sequence[i]);}
     }
     printf("\n");
@@ -109,6 +109,9 @@ bool requestResources(int p_id, int requests[NUM_RESOURCES]){
     }
     //check for deadlock
     if (findSafeSecuence()){
+        for(int i= 0; i < NUM_PROCESSES ;i++){
+            finish[i] = 0;
+        }
         return true; //there is no problem giving the resources
     }else{
         //hault and roll back
@@ -149,14 +152,20 @@ int main() {
     while (clocks <10)
     {
         random_process= rand() % NUM_PROCESSES;
-        int random_action = rand()%4;
+        int random_action = rand()%2;
         switch (random_action)
         {
-        case 0:
+        case 0: //free or start a task
+            if ((alloc[random_process][0] + alloc[random_process][1] + alloc[random_process][2]) == 0){
+                printf("P%d:\tstarting task, asking for resources\n",random_process);
+                calculateNeeds();
+                int res[3]= {1,1,1};
+                requestResources(random_process,res);
+            }else{
             printf("P%d:\tfinished,resources freed\n",random_process);
             free_alloc(random_process);
+            }
             break;
-        
         default:
             printf("P%d:\tasking for resources \n",random_process);
             int request[NUM_RESOURCES];
